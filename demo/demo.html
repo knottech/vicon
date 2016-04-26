@@ -14,15 +14,15 @@
   </style>
   <script>
     $().ready(function() {
-        for(var icon in $.icons){
-            var r=document.createElement("svg");
-            $(r).attr("class","icon "+icon);
-            $("#demo").append(r);
-        }
-        $("#demo").html($("#demo").html());
-        for(var icon in $.icons){
-            $("."+icon).icon(icon);
-        }
+      for (var icon in $.icons) {
+        var r = document.createElement("svg");
+        $(r).attr("class", "icon " + icon);
+        $("#demo").append(r);
+      }
+      $("#demo").html($("#demo").html());
+      for (var icon in $.icons) {
+        $("." + icon).icon(icon);
+      }
     })
   </script>
 </head>

@@ -46,6 +46,9 @@
             data = icons[name];
         }
         if (data) {
+            var g=$("<g id='abc'> </g>"),
+                gName="iconw"+svg.position().top+"h"+svg.position().left+"a";
+            g.attr("id",gName)
             $.each(data['polygons'], function(idx, val) {
                 var p = $("<polygon></polygon>"),
                     kx = svg.width() / data["width"],
@@ -53,11 +56,23 @@
                 pts = scale(val, kx, ky);
                 p.attr("fill", "#171b26");
                 p.attr("points", pts);
+
+                var a=$("<animateTransform />");
+                var cx=svg.width()/2,
+                    cy=svg.height()/2;
+                a.attr("attributeName","transform");
+                a.attr("begin",gName+".mouseover");
+                a.attr("dur","300ms");
+                a.attr("type","rotate");
+                a.attr("from","0 "+cx+" "+cy);
+                a.attr("to","360 "+cx+" "+cy);
+                p.append(a);
+                g.append(p);
                 // p.attr("stroke", );
                 // p.attr("stroke-width", );
-                svg.append(p);
-                svg.html(svg.html());
             })
+            svg.append(g);
+            svg.html(svg.html());
         }
 
     }
