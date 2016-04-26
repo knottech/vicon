@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>vicon demo</title>
+  <script src="../src/jquery.min.js"></script>
+  <script src="../src/vicon.js"></script>
+  <style>
+    svg.icon {
+      width: 35px;
+      height: 35px;
+    }
+  </style>
+  <script>
+    $().ready(function() {
+        for(var icon in $.icons){
+            var r=document.createElement("svg");
+            $(r).attr("class","icon "+icon);
+            $("#demo").append(r);
+        }
+        $("#demo").html($("#demo").html());
+        for(var icon in $.icons){
+            $("."+icon).icon(icon);
+        }
+    })
+  </script>
+</head>
+
+<body>
+  <div id="demo"></div>
+</body>
+
+</html>
