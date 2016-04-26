@@ -5,6 +5,8 @@ vector icon created dynamically by javascript and json.
 * plus
 * minus
 * play
+* signal
+* step-backward
 
 # JSON example:
 
@@ -24,3 +26,4 @@ vector icon created dynamically by javascript and json.
 # animations:
 1. Rotate
 2. Assembly
+3. Scale
