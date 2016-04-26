@@ -4,24 +4,34 @@
             "width": 100,
             "height": 100,
             "polygons": [
-                "25,40 75,40 75,60 25,60",
-                "40,25 40,75 60,75 60,25"
+                "-30,10 30,10 30,-10 -30,-10",
+                "-10,30 10,30 10,-30 -10,-30"
             ]
         },
         "minus": {
             "width": 100,
             "height": 100,
             "polygons": [
-                "25,40 75,40 75,60 25,60"
+                "-30,10 30,10 30,-10 -30,-10",
             ]
         },
-        "play":{
+        "play": {
             "width": 100,
             "height": 100,
             "polygons": [
-                "35,25 35,75 80,50"
+                "-35,25 -35,-25 25,0"
             ]
-        }
+        },
+        "block": {
+            "width": 100,
+            "height": 100,
+            "polygons": [
+                "0,0 20,0 20,20 0,20",
+                "0,0 -20,0 -20,20 0,20",
+                "0,0 -20,0 -20,-20 0,-20",
+                "0,0 20,0 20,-20 0,-20"
+            ]
+        },
     }
 
     function scale(val, kx, ky) {
@@ -36,37 +46,78 @@
         });
         return pts.join(" ");
     }
-    $.icons=icons;
-    $.fn.icon = function(name) {
+    $.icons = icons;
+    $.fn.icon = function(options) {
+        var defaults = {
+            'name': 'plus',
+            'animation': 'assembly'
+        };
         var svg = $(this),
-            data;
-        if (name instanceof Object) {
-            data = name;
+            data,
+            width=svg.width(),
+            height=svg.height(),
+            settings;
+        svg.attr("viewBox","0 0 "+width+" "+height);
+        if (options instanceof Object) {
+            settings = $.extent(defaults, options);
         } else if ((typeof name) === "string") {
-            data = icons[name];
+            settings = $.extend(defaults, {
+                'name': options
+            });
+            settings['data'] = icons[options];
         }
+        data = settings['data'];
         if (data) {
-            var g=$("<g id='abc'> </g>"),
-                gName="iconw"+svg.position().top+"h"+svg.position().left+"a";
-            g.attr("id",gName)
+            var g = $("<g> </g>"),
+                gName = "iconw" + svg.position().top + "h" + svg.position().left + "a";
+            g.attr("id", gName)
+            g.attr("transform","translate("+width/2+","+height/2+")");
             $.each(data['polygons'], function(idx, val) {
                 var p = $("<polygon></polygon>"),
-                    kx = svg.width() / data["width"],
-                    ky = svg.height() / data["height"];
+                    kx = width / data["width"],
+                    ky = height / data["height"];
                 pts = scale(val, kx, ky);
                 p.attr("fill", "#171b26");
                 p.attr("points", pts);
 
-                var a=$("<animateTransform />");
-                var cx=svg.width()/2,
-                    cy=svg.height()/2;
-                a.attr("attributeName","transform");
-                a.attr("begin",gName+".mouseover");
-                a.attr("dur","300ms");
-                a.attr("type","rotate");
-                a.attr("from","0 "+cx+" "+cy);
-                a.attr("to","360 "+cx+" "+cy);
-                p.append(a);
+                if (settings['animation'] === "rotate") {
+                    var a = $("<animateTransform />");
+                    a.attr("attributeName", "transform");
+                    a.attr("begin", gName + ".mouseover");
+                    a.attr("dur", "300ms");
+                    a.attr("type", "rotate");
+                    a.attr("from", "0 0 0");
+                    a.attr("to", "360 0 0");
+                    p.append(a);
+                } else if (settings['animation'] === "assembly") {
+                    var a = $("<animateMotion />");
+                    var lix=[],
+                        liy=[],
+                        cx,
+                        cy;
+                    $.each(val.split(" "), function(i, pt) {
+                        var pt = pt.split(","),
+                            x = parseFloat(pt[0]),
+                            y = parseFloat(pt[1]);
+                        lix.push(x);
+                        liy.push(y);
+                        cx=(lix.reduce(function(a,b){return a+b}))/lix.length;
+                        cy=(lix.reduce(function(a,b){return a+b}))/liy.length;
+                    });
+                    a.attr("begin", gName + ".mouseover");
+                    a.attr("dur", "300ms");
+                    a.attr("path", "M0,0 "+cx*2+","+cy*2);
+                    p.append(a);
+                }else if(settings['animation'] === "scale") {
+                    var a = $("<animateTransform />");
+                    a.attr("attributeName", "transform");
+                    a.attr("begin", gName + ".mouseover");
+                    a.attr("dur", "300ms");
+                    a.attr("type", "scale");
+                    a.attr("from", "1");
+                    a.attr("to", "3");
+                    p.append(a);
+                }
                 g.append(p);
                 // p.attr("stroke", );
                 // p.attr("stroke-width", );
