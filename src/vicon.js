@@ -50,11 +50,33 @@
                 "-20,0 15,25 15,-25"
             ]
         },
+        "pause": {
+            "width": 100,
+            "height": 100,
+            "polygons": [
+                "-20,-25 -20,25 -5,25 -5,-25",
+                "20,-25 20,25 5,25 5,-25"
+            ]
+        },
+        "stop": {
+            "width": 100,
+            "height": 100,
+            "polygons": [
+                "-20,-20 -20,20 20,20 20,-20"
+            ]
+        },
         "star": {
             "width": 100,
             "height": 100,
             "polygons": [
                 "0,50 47.55,15.45 38.3,-40.45 -38.3,-40.45 -47.55,15.45"
+            ]
+        },
+        "pie": {
+            "width": 100,
+            "height": 100,
+            "paths": [
+                "M-20,20 A50,50,0,1,0,20,-20 Z"
             ]
         },
     }
@@ -70,12 +92,61 @@
             pts[i] = x.toString() + "," + y.toString();
         });
         return pts.join(" ");
+    };
+    function scalePath(val,kx,ky){
+      var vecs=val.match(/[MmLlHhVvAa][ \.,\d-]+/g),
+          new_vecs=[];
+      $.each(vecs,function(idx,vec){
+        if('MmLl'.indexOf(vec[0])>=0){
+          var li=vec.match(/[\d-\.]+/g);
+          var x=li[0],
+              y=li[1];
+          x = Math.round(x * kx * 100) / 100;
+          y = -Math.round(y * ky * 100) / 100;
+          new_vecs.push(vec[0]+x.toString()+","+y.toString());
+        }else if('Hh'.indexOf(vec[0])>=0){
+          var x=(vec.match(/[\d-\.]+/g))[0];
+          x = Math.round(x * kx * 100) / 100;
+          new_vecs.push(vec[0]+x.toString());
+        }else if('Vv'.indexOf(vec[0])>=0){
+          var y=(vec.match(/[\d-\.]+/g))[0];
+          y = -Math.round(y * ky * 100) / 100;
+          new_vecs.push(vec[0]+y.toString());
+        }else if('Aa'.indexOf(vec[0])>=0){
+          var li=vec.match(/[\d-\.]+/g);
+          var x1=li[0],
+              y1=li[1],
+              angle=li[2],
+              flag1=li[3],
+              flag2=li[4],
+              x2=li[5],
+              y2=li[6];
+          x1 = Math.round(x1 * kx * 100) / 100;
+          y1 = -Math.round(y1 * ky * 100) / 100;
+          x2 = Math.round(x2 * kx * 100) / 100;
+          y2 = -Math.round(y2 * ky * 100) / 100;
+          new_vecs.push(vec[0]
+            +x1.toString()+","
+            +y1.toString()+","
+            +angle.toString()+","
+            +flag1.toString()+","
+            +flag2.toString()+","
+            +x2.toString()+","
+            +y2.toString()
+          );
+        }
+      }
+      return new_vecs.join(' ');
+    );
     }
     $.icons = icons;
     $.fn.icon = function(options) {
         var defaults = {
-            'name': 'plus',
-            'animation': 'rotate'
+            "width":100,
+            "height": 100,
+            "animation": 'rotate',
+            "polygons":[],
+            "paths":[]
         };
         var svg = $(this),
             data,
@@ -85,27 +156,22 @@
         svg.attr("viewBox","0 0 "+width+" "+height);
         if (options instanceof Object) {
             settings = $.extent(defaults, options);
-        } else if ((typeof name) === "string") {
-            settings = $.extend(defaults, {
-                'name': options
-            });
-            settings['data'] = icons[options];
+        } else if ((typeof options) === "string") {
+            settings = $.extend(defaults, icons[options]);
         }
-        data = settings['data'];
-        if (data) {
+        console.log(settings);
+        if (true) {
             var g = $("<g> </g>"),
-
                 gName = "iconw" + svg.position().top + "h" + svg.position().left + "a";
             g.attr("id", gName)
             g.attr("transform","translate("+width/2+","+height/2+")");
-            $.each(data['polygons'], function(idx, val) {
+            $.each(settings['polygons'], function(idx, val) {
                 var p = $("<polygon></polygon>"),
-                    kx = width / data["width"],
-                    ky = height / data["height"];
+                    kx = width / settings["width"],
+                    ky = height / settings["height"];
                 pts = scale(val, kx, ky);
                 p.attr("fill", "#171b26");
                 p.attr("points", pts);
-
                 if (settings['animation'] === "rotate") {
                     var a = $("<animateTransform />");
                     a.attr("attributeName", "transform");
@@ -151,10 +217,17 @@
                 g.append(p);
                 // p.attr("stroke", );
                 // p.attr("stroke-width", );
-            })
+            });
+            $.each(settings['paths'], function(idx, val) {
+                var p = $("<path></path>"),
+                    kx = width / settings["width"],
+                    ky = height / settings["height"];
+                pts = scalePath(val, kx, ky);
+                p.attr("fill", "#171b26");
+                p.attr("d", pts);
+            });
             svg.append(g);
             svg.html(svg.html());
         }
-
-    }
+      }
 }(jQuery));
